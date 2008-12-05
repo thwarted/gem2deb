@@ -1,0 +1,129 @@
+#!/bin/bash
+# vim: ts=4 expandtab
+
+# from 
+# http://blog.loftninjas.org/?p=248
+
+if [ $# -le 1 ]; then
+    echo "Usage: $0 <URL to .gem or .tar.gz>  [ <package name> ]" >&2
+    echo "Generate a .deb package from a ruby .gem (or gem as .tar.gz)" >&2
+    exit 1
+fi
+
+URL=$1
+
+set -x
+
+origpath=`pwd`
+trap "cd '$origpath' && test -d '$WORKDIR' && rm -rf '$WORKDIR'" EXIT
+
+WORKDIR=`mktemp -t -d gm2db.XXXXXXXXXX`
+#WORKDIR=/tmp/gx1
+#rm -rf $WORKDIR
+#mkdir -p $WORKDIR
+#echo $WORKDIR
+
+if [ $? -ne 0 -o \! -d "$WORKDIR" ]; then
+    echo "$0: unable to create temporary directory" >&2
+    exit 1
+fi
+
+cd $WORKDIR
+wget "$URL"
+filename=`basename $URL`
+
+case $filename in 
+    *.gem )
+        gem unpack $filename
+        basedir=`basename $filename .gem`
+        ;;
+    *.tar.gz )
+        tar xvzf $filename
+        basedir=`basename $filename .tar.gz`
+        ;; 
+    *.tgz )
+        tar xvzf $filename
+        basedir=`basename $filename .tgz`
+        ;; 
+    *.tar.bz2 )
+        tar xvjf $filename
+        basedir=`basename $filename .tar.bz2`
+        ;;
+    * )
+        echo "$0: unable to extract $filename\n" >&2
+        exit 1
+        ;;
+esac
+
+cd $basedir
+cp /usr/lib/ruby/1.8/setup.rb .
+mkdir debian
+BD=`pwd`
+VERSION=`basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;'`
+PACKAGE=`basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;'`
+DEBEMAIL="Yelp Systems <systems@yelp.com>"
+
+# we don't want to edit the changelog file after generation
+# so make /usr/bin/sensible-editor attempt to use /bin/true as the editor
+EDITOR=/bin/true
+VISUAL=/bin/true
+export EDITOR VISUAL
+
+if [ "x$2" = "x" ]; then
+    PACKAGE=lib$PACKAGE-ruby
+else
+    PACKAGE=$2
+fi
+
+dch --create -v$VERSION-1yelp -D feisty --package $PACKAGE 'initial release'
+
+
+cat > debian/rules <<EOF
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+# Ruby package with setup.rb
+include /usr/share/ruby-pkg-tools/1/class/ruby-setup-rb.mk
+EOF
+chmod ugo+rx debian/rules
+
+cat > debian/control <<EOF
+Source: $PACKAGE
+Section: libs
+Priority: optional
+Maintainer: No One
+Build-Depends: cdbs, debhelper (>> 5.0.0), ruby-pkg-tools, ruby1.8
+Standards-Version: 3.8.0
+
+Package: $PACKAGE
+Architecture: all
+Depends: ${PACKAGE}1.8
+Description: the $PACKAGE ruby gem
+ .
+ This is a dummy package to install the $PACKAGE ruby gem
+ the default version of Ruby.
+
+Package: ${PACKAGE}1.8
+Architecture: all
+Depends: ruby1.8
+Description: the $PACKAGE ruby gem
+
+Package: $PACKAGE-doc
+Section: doc
+Architecture: all
+Description: documentation for the $PACKAGE ruby gem
+ .
+ This is the documentation package, with upstream documentation as well as
+ generated rdoc.
+EOF
+
+dpkg-buildpackage -rfakeroot
+
+cd $origpath
+mkdir -p $PACKAGE
+cp $WORKDIR/$PACKAGE* $PACKAGE/
+ls -l $PACKAGE/*
+
+rm -rf "$WORKDIR"
+
