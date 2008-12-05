@@ -1,6 +1,9 @@
 #!/bin/bash
 # vim: ts=4 expandtab
 
+DEBEMAIL="Your Name <youremail@example.com>"
+RELEASE="1rel"
+
 # from 
 # http://blog.loftninjas.org/?p=248
 
@@ -61,7 +64,6 @@ mkdir debian
 BD=`pwd`
 VERSION=`basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;'`
 PACKAGE=`basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;'`
-DEBEMAIL="Yelp Systems <systems@yelp.com>"
 
 # we don't want to edit the changelog file after generation
 # so make /usr/bin/sensible-editor attempt to use /bin/true as the editor
@@ -75,7 +77,7 @@ else
     PACKAGE=$2
 fi
 
-dch --create -v$VERSION-1yelp -D feisty --package $PACKAGE 'initial release'
+dch --create -v$VERSION-$RELEASE -D feisty --package $PACKAGE 'initial release'
 
 
 cat > debian/rules <<EOF
