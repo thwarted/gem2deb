@@ -3,6 +3,7 @@
 
 DEBEMAIL="Your Name <youremail@example.com>"
 RELEASE="1rel"
+DISTRO=feisty
 
 # from 
 # http://blog.loftninjas.org/?p=248
@@ -13,57 +14,53 @@ if [ $# -le 1 ]; then
     exit 1
 fi
 
-URL=$1
+URL="$1"
 
 set -x
 
-origpath=`pwd`
+origpath=$( pwd )
 trap "cd '$origpath' && test -d '$WORKDIR' && rm -rf '$WORKDIR'" EXIT
 
-WORKDIR=`mktemp -t -d gm2db.XXXXXXXXXX`
-#WORKDIR=/tmp/gx1
-#rm -rf $WORKDIR
-#mkdir -p $WORKDIR
-#echo $WORKDIR
+WORKDIR=$( mktemp -t -d gm2db.XXXXXXXXXX )
 
-if [ $? -ne 0 -o \! -d "$WORKDIR" ]; then
+if [ $? -ne 0 -o ! -d "$WORKDIR" ]; then
     echo "$0: unable to create temporary directory" >&2
     exit 1
 fi
 
 cd $WORKDIR
 wget "$URL"
-filename=`basename $URL`
+filename=$( basename $URL )
 
 case $filename in 
     *.gem )
-        gem unpack $filename
-        basedir=`basename $filename .gem`
+        gem unpack "$filename"
+        basedir=$( basename "$filename" .gem )
         ;;
     *.tar.gz )
-        tar xvzf $filename
-        basedir=`basename $filename .tar.gz`
+        tar xvzf "$filename"
+        basedir=$( basename "$filename" .tar.gz )
         ;; 
     *.tgz )
-        tar xvzf $filename
-        basedir=`basename $filename .tgz`
+        tar xvzf "$filename"
+        basedir=$( basename "$filename" .tgz )
         ;; 
     *.tar.bz2 )
-        tar xvjf $filename
-        basedir=`basename $filename .tar.bz2`
+        tar xvjf "$filename"
+        basedir=$( basename "$filename" .tar.bz2 )
         ;;
     * )
-        echo "$0: unable to extract $filename\n" >&2
+        echo "$0: unable to extract $filename" >&2
         exit 1
         ;;
 esac
 
-cd $basedir
+cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
 mkdir debian
-BD=`pwd`
-VERSION=`basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;'`
-PACKAGE=`basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;'`
+BD=$( pwd )
+VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
+PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
 
 # we don't want to edit the changelog file after generation
 # so make /usr/bin/sensible-editor attempt to use /bin/true as the editor
@@ -71,13 +68,13 @@ EDITOR=/bin/true
 VISUAL=/bin/true
 export EDITOR VISUAL
 
-if [ "x$2" = "x" ]; then
+if [ -z "$2" ]; then
     PACKAGE=lib$PACKAGE-ruby
 else
-    PACKAGE=$2
+    PACKAGE="$2"
 fi
 
-dch --create -v$VERSION-$RELEASE -D feisty --package $PACKAGE 'initial release'
+dch --create "-v$VERSION-$RELEASE" -D $DISTRO --package "$PACKAGE" 'initial release'
 
 
 cat > debian/rules <<EOF
