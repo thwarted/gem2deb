@@ -40,7 +40,7 @@ BD=$( pwd )
 VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
 PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
 
-GEM_DEPENDENCIES=`gem dependency "$1" | grep runtime | sed 's/\(\w*\) (\(.*\), runtime)/\1 (\2)/' | tr '\n' ',' | sed 's/,$//'`
+GEM_DEPENDENCIES=`gem dependency "$1" | grep runtime | sed 's/ *\(\w*\) (\(.*\), runtime)/rubygem-\1 (\2)/' | tr '\n' ',' | sed 's/,$//'`
 
 if [ -d ext ]; then
   ARCHITECTURE=amd64
@@ -89,7 +89,7 @@ Standards-Version: 3.8.0
 
 Package: $PACKAGE
 Architecture: $ARCHITECTURE
-Depends: Depends: ruby1.8, $DEPLIST
+Depends: ruby1.8, $DEPLIST
 Description: the $PACKAGE ruby gem
 
 Package: $PACKAGE-doc
