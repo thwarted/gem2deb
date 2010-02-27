@@ -1,9 +1,9 @@
 #!/bin/bash
 # vim: ts=4 expandtab
 
-DEBEMAIL="Your Name <youremail@example.com>"
+DEBEMAIL="Cliff Moon <cliff@fastip.com>"
 RELEASE="1rel"
-DISTRO=feisty
+DISTRO=karmic
 
 # from 
 # http://blog.loftninjas.org/?p=248
@@ -29,31 +29,9 @@ if [ $? -ne 0 -o ! -d "$WORKDIR" ]; then
 fi
 
 cd $WORKDIR
-wget "$URL"
-filename=$( basename $URL )
-
-case $filename in 
-    *.gem )
-        gem unpack "$filename"
-        basedir=$( basename "$filename" .gem )
-        ;;
-    *.tar.gz )
-        tar xvzf "$filename"
-        basedir=$( basename "$filename" .tar.gz )
-        ;; 
-    *.tgz )
-        tar xvzf "$filename"
-        basedir=$( basename "$filename" .tgz )
-        ;; 
-    *.tar.bz2 )
-        tar xvjf "$filename"
-        basedir=$( basename "$filename" .tar.bz2 )
-        ;;
-    * )
-        echo "$0: unable to extract $filename" >&2
-        exit 1
-        ;;
-esac
+filename=`gem fetch "$1" | awk '{print $2}'`
+gem unpack "$filename.gem"
+basedir=$(basename $filename)
 
 cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
@@ -61,6 +39,14 @@ mkdir debian
 BD=$( pwd )
 VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
 PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
+
+GEM_DEPENDENCIES=`gem dependency sinatra | grep runtime | sed 's/\(\w*\) (\(.*\), runtime)/\1 (\2)/' | tr '\n' ',' | sed 's/,$//'`
+
+if [ -d ext ]; then
+  ARCHITECTURE=amd64
+else
+  ARCHITECTURE=all
+fi
 
 # we don't want to edit the changelog file after generation
 # so make /usr/bin/sensible-editor attempt to use /bin/true as the editor
@@ -96,7 +82,7 @@ Build-Depends: cdbs, debhelper (>> 5.0.0), ruby-pkg-tools, ruby1.8
 Standards-Version: 3.8.0
 
 Package: $PACKAGE
-Architecture: all
+Architecture: $ARCHITECTURE
 Depends: ${PACKAGE}1.8
 Description: the $PACKAGE ruby gem
  .
@@ -104,8 +90,8 @@ Description: the $PACKAGE ruby gem
  the default version of Ruby.
 
 Package: ${PACKAGE}1.8
-Architecture: all
-Depends: ruby1.8
+Architecture: $ARCHITECTURE
+Depends: ruby1.8, $GEM_DEPENDENCIES $DEPENDENCIES
 Description: the $PACKAGE ruby gem
 
 Package: $PACKAGE-doc
@@ -124,5 +110,5 @@ mkdir -p $PACKAGE
 cp $WORKDIR/$PACKAGE* $PACKAGE/
 ls -l $PACKAGE/*
 
-rm -rf "$WORKDIR"
+#rm -rf "$WORKDIR"
 
