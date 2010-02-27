@@ -89,15 +89,7 @@ Standards-Version: 3.8.0
 
 Package: $PACKAGE
 Architecture: $ARCHITECTURE
-Depends: ${PACKAGE}1.8
-Description: the $PACKAGE ruby gem
- .
- This is a dummy package to install the $PACKAGE ruby gem
- the default version of Ruby.
-
-Package: ${PACKAGE}1.8
-Architecture: $ARCHITECTURE
-Depends: ruby1.8, $DEPLIST
+Depends: Depends: ruby1.8, $DEPLIST
 Description: the $PACKAGE ruby gem
 
 Package: $PACKAGE-doc
