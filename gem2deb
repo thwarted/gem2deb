@@ -67,7 +67,7 @@ else
   DEPLIST="$GEM_DEPENDENCIES, $DEPENDENCIES"
 fi
 
-dch --create "-v$VERSION-$RELEASE" -D $DISTRO --package "$PACKAGE" 'initial release'
+dch --create "-v$VERSION" -D $DISTRO --package "$PACKAGE" 'initial release'
 
 
 cat > debian/rules <<EOF
