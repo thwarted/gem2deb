@@ -40,9 +40,9 @@ BD=$( pwd )
 VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
 PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
 
-GEM_DEPENDENCIES=`gem dependency "$1" | grep runtime | sed 's/ *\(\w*\) (\(.*\), runtime)/lbi\1-ruby1.8 (\2)/' | \
-  tr '\n_' ',-' | sed 's/,$//' | sed 's/~>/=/g'`
-
+GEM_DEPENDENCIES=`gem dependency "$1" | grep runtime | sed 's/ *\(\w*\) (\(.*\), runtime)/lib\1-ruby1.8 (\2)/' | \
+  tr '\n_' ',-' | sed 's/,$//' | sed 's/~>/>=/g'`
+echo $GEM_DEPENDENCIES
 if [ -d ext ]; then
   ARCHITECTURE=amd64
 else
