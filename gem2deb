@@ -32,7 +32,7 @@ cd $WORKDIR
 
 if [ `echo $filename | tail -c4` -eq "gem" ]; then
   filename=`basename "$filename" .gem`
-  gem unpack "$filename"
+  gem unpack "$filename.gem"
   basedir=$(dirname "$filename")
 else
   filename=`gem fetch "$1" | awk '{print $2}'`
@@ -40,7 +40,7 @@ else
   basedir=$(basename "$filename")
 fi
 
-
+GEM_DEPENDENCIES=`$basedir/gemdeps.rb $filename.gem`
 
 cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
@@ -49,9 +49,6 @@ BD=$( pwd )
 VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
 PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
 
-GEM_DEPENDENCIES=`gem dependency "$1" | grep runtime | sed 's/ *\(\w*\) (\(.*\), runtime)/lib\1-ruby1.8 (\2)/' | \
-  tr '\n_' ',-' | sed 's/,$//' | sed 's/~>/>=/g'`
-echo $GEM_DEPENDENCIES
 if [ -d ext ]; then
   ARCHITECTURE=`uname -m | sed s/x86_64/amd64/`
 else
