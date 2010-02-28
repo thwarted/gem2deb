@@ -3,8 +3,8 @@
 require 'rubygems'
 require 'rubygems/format'
 
-gemname = unshift($ARGS)
+gemname = ARGV.shift
 
 format = Gem::Format.from_file_by_path(gemname)
 
-puts format.spec.dependencies.map {|d| name.gsub("_", "-") + " (" + d.requirements.gsub("~>", ">=") + ")" }.join(", ")
+puts format.spec.dependencies.select {|d| d.type == :runtime }.map {|d| d.name.gsub("_", "-") + " (" + d.version_requirements.to_s.gsub("~>", ">=") + ")" }.join(", ")
