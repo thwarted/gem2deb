@@ -56,7 +56,7 @@ VISUAL=/bin/true
 export EDITOR VISUAL
 
 if [ -z "$2" ]; then
-    PACKAGE=lib$PACKAGE-ruby
+    PACKAGE=lib$PACKAGE-ruby1.8
 else
     PACKAGE="$2"
 fi
