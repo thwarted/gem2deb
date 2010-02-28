@@ -29,9 +29,18 @@ if [ $? -ne 0 -o ! -d "$WORKDIR" ]; then
 fi
 
 cd $WORKDIR
-filename=`gem fetch "$1" | awk '{print $2}'`
-gem unpack "$filename.gem"
-basedir=$(basename $filename)
+
+if [ `echo $filename | tail -c4` -eq "gem" ]; then
+  filename=`basename "$filename" .gem`
+  gem unpack "$filename"
+  basedir=$(dirname "$filename")
+else
+  filename=`gem fetch "$1" | awk '{print $2}'`
+  gem unpack "$filename.gem"
+  basedir=$(basename "$filename")
+fi
+
+
 
 cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
