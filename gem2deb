@@ -2,7 +2,7 @@
 # vim: ts=4 expandtab
 
 DEBEMAIL="Cliff Moon <cliff@fastip.com>"
-RELEASE="1rel"
+RELEASE=""
 DISTRO=karmic
 
 # from 
@@ -44,7 +44,7 @@ GEM_DEPENDENCIES=`gem dependency "$1" | grep runtime | sed 's/ *\(\w*\) (\(.*\),
   tr '\n_' ',-' | sed 's/,$//' | sed 's/~>/>=/g'`
 echo $GEM_DEPENDENCIES
 if [ -d ext ]; then
-  ARCHITECTURE=amd64
+  ARCHITECTURE=`uname -m | sed s/x86_64/amd64/`
 else
   ARCHITECTURE=all
 fi
