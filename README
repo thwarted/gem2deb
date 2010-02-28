@@ -1,8 +1,0 @@
-A bash script based on the instructions at 
-    http://blog.loftninjas.org/?p=248 
-to turn a .gem into a .deb.
-
-Most likely needs some improvement to make it more robust, however 
-it has worked on the handful of gems I've used it for for building
-and installation on both Ubuntu feisty and hardy.
-
