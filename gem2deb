@@ -34,24 +34,27 @@ suffix=`echo "$1" | tail -c4`
 if [ "$suffix" = "gem" ]; then
   cp $filename $WORKDIR
   cd $WORKDIR
-  filename=`basename "$filename" .gem`
-  gem unpack "$filename.gem"
-  basedir=$(dirname "$filename")
+  gem unpack "$filename"
+  basedir=$(basename "$filename")
 else
   cd $WORKDIR
   filename=`gem fetch "$1" | awk '{print $2}'`
-  gem unpack "$filename.gem"
+  filename="$filename.gem"
+  gem unpack "$filename"
   basedir=$(basename "$filename")
 fi
 
-GEM_DEPENDENCIES=`$gem2debdir/gemdeps.rb $filename.gem`
+VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
+PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
+gemname=$PACKAGE
+
+GEM_DEPENDENCIES=`$gem2debdir/gemdeps.rb $filename`
 
 cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
 mkdir debian
 BD=$( pwd )
-VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
-PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
+
 
 if [ -d ext ]; then
   ARCHITECTURE=any
@@ -66,7 +69,7 @@ VISUAL=/bin/true
 export EDITOR VISUAL
 
 if [ -z "$2" ]; then
-    PACKAGE=lib$( echo $filename | tr '_' '-' ) -ruby
+    PACKAGE=lib$( echo $gemname | tr '_' '-' ) -ruby
 else
     PACKAGE="$2"
 fi
