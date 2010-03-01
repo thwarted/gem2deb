@@ -62,7 +62,7 @@ VISUAL=/bin/true
 export EDITOR VISUAL
 
 if [ -z "$2" ]; then
-    PACKAGE=lib$PACKAGE-ruby1.8
+    PACKAGE=lib$PACKAGE-ruby
 else
     PACKAGE="$2"
 fi
@@ -95,6 +95,14 @@ Build-Depends: cdbs, debhelper (>> 5.0.0), ruby-pkg-tools, ruby1.8
 Standards-Version: 3.8.0
 
 Package: $PACKAGE
+Architecture: all
+Depends: ${PACKAGE}1.8
+Description: the $PACKAGE ruby gem
+ .
+ This is a dummy package to install the $PACKAGE ruby gem
+ the default version of Ruby.
+
+Package: $PACKAGE1.8
 Architecture: $ARCHITECTURE
 Depends: ruby1.8, $DEPLIST
 Description: the $PACKAGE ruby gem
