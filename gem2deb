@@ -5,16 +5,18 @@ DEBEMAIL="Cliff Moon <cliff@fastip.com>"
 RELEASE=""
 DISTRO=karmic
 
+base=`dirname $0`
+gem2debdir=`cd $base ; pwd`
 # from 
 # http://blog.loftninjas.org/?p=248
 
-if [ $# -le 1 ]; then
+if [ $# -le 0 ]; then
     echo "Usage: $0 <URL to .gem or .tar.gz>  [ <package name> ]" >&2
     echo "Generate a .deb package from a ruby .gem (or gem as .tar.gz)" >&2
     exit 1
 fi
 
-URL="$1"
+filename="$1"
 
 set -x
 
@@ -28,19 +30,21 @@ if [ $? -ne 0 -o ! -d "$WORKDIR" ]; then
     exit 1
 fi
 
-cd $WORKDIR
-
-if [ `echo $filename | tail -c4` -eq "gem" ]; then
+suffix=`echo "$1" | tail -c4`
+if [ "$suffix" = "gem" ]; then
+  cp $filename $WORKDIR
+  cd $WORKDIR
   filename=`basename "$filename" .gem`
   gem unpack "$filename.gem"
   basedir=$(dirname "$filename")
 else
+  cd $WORKDIR
   filename=`gem fetch "$1" | awk '{print $2}'`
   gem unpack "$filename.gem"
   basedir=$(basename "$filename")
 fi
 
-GEM_DEPENDENCIES=`$basedir/gemdeps.rb $filename.gem`
+GEM_DEPENDENCIES=`$gem2debdir/gemdeps.rb $filename.gem`
 
 cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
@@ -50,7 +54,7 @@ VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
 PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
 
 if [ -d ext ]; then
-  ARCHITECTURE=`uname -m | sed s/x86_64/amd64/`
+  ARCHITECTURE=any
 else
   ARCHITECTURE=all
 fi
@@ -62,7 +66,7 @@ VISUAL=/bin/true
 export EDITOR VISUAL
 
 if [ -z "$2" ]; then
-    PACKAGE=lib$PACKAGE-ruby1.8
+    PACKAGE=lib$filename-ruby
 else
     PACKAGE="$2"
 fi
