@@ -1,0 +1,37 @@
+gem2deb
+====
+
+Synopsis
+----
+
+    gem2deb <gem name> [<target package name>]
+
+Description
+-----
+
+gem2deb will covert a ruby gem into a set of debian packages and a debian
+changes file suitable for use with dupload.  In the synopsis above the gem name
+is simply the name of a gem available via the gem command.  gem2deb fetches the
+gem, unpacks it to a tmp directory and builds a set of debs out of it.
+
+gem2deb will detect any dependencies declared in the gem and translate them
+into debian dependencies of the form lib{gem}-ruby.  It is important to note
+that underscores are not allowed in debian package names, therefore gem2deb
+translates underscores into dashes when it creates gem packages and
+dependencies.
+
+Environment
+-----
+
+* DEPENDENCIES - Any extra runtime dependencies you would like to declare for a package.
+
+Examples
+-----
+
+Package the thin gem:
+
+    gem2deb thin
+
+Package do_sqlite3 and set its dependency on sqlite3:
+
+    env DEPENDENCIES="sqlite3" gem2deb do_sqlite3 libdo-sqlite3-ruby
