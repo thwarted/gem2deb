@@ -35,18 +35,15 @@ if [ "$suffix" = "gem" ]; then
   cp $filename $WORKDIR
   cd $WORKDIR
   gem unpack "$filename"
-  basedir=$(basename "$filename")
+  basedir=$(basename "$filename" .gem)
 else
   cd $WORKDIR
   filename=`gem fetch "$1" | awk '{print $2}'`
   filename="$filename.gem"
   gem unpack "$filename"
-  basedir=$(basename "$filename")
+  basedir=$(basename "$filename" .gem)
 fi
 
-VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
-PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
-gemname=$PACKAGE
 
 GEM_DEPENDENCIES=`$gem2debdir/gemdeps.rb $filename`
 
@@ -54,6 +51,9 @@ cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
 mkdir debian
 BD=$( pwd )
+VERSION=$( basename $BD | perl -pe 's/^.+-([\d.]+)$/$1/;' )
+PACKAGE=$( basename $BD | perl -pe 's/^(.+)-[\d.]+$/$1/;' )
+gemname=$PACKAGE
 
 
 if [ -d ext ]; then
