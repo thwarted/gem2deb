@@ -38,6 +38,7 @@ suffix=`echo "$1" | tail -c4`
 if [ "$suffix" = "gem" ]; then
   cp $filename $WORKDIR
   cd $WORKDIR
+  filename=$(basename "$filename")
   gem unpack "$filename"
   basedir=$(basename "$filename" .gem)
 else
