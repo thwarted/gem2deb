@@ -111,7 +111,7 @@ Standards-Version: 3.8.0
 
 Package: $PACKAGE
 Architecture: all
-Depends: ${PACKAGE}1.8
+Depends: ${PACKAGE}1.8 (= $VERSION)
 Description: the $PACKAGE ruby gem
  .
  This is a dummy package to install the $PACKAGE ruby gem
