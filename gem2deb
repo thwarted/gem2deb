@@ -21,9 +21,13 @@ filename="$1"
 set -x
 
 origpath=$( pwd )
-trap "cd '$origpath' && test -d '$WORKDIR' && rm -rf '$WORKDIR'" EXIT
+#trap "cd '$origpath' && test -d '$WORKDIR' && rm -rf '$WORKDIR'" EXIT
 
-WORKDIR=$( mktemp -t -d gm2db.XXXXXXXXXX )
+if [ -z "$WORKDIR" ]; then
+  WORKDIR=$( mktemp -t -d gm2db.XXXXXXXXXX )
+else
+  mkdir $WORKDIR
+fi
 
 if [ $? -ne 0 -o ! -d "$WORKDIR" ]; then
     echo "$0: unable to create temporary directory" >&2
@@ -91,6 +95,8 @@ include /usr/share/cdbs/1/rules/simple-patchsys.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 # Ruby package with setup.rb
 include /usr/share/ruby-pkg-tools/1/class/ruby-setup-rb.mk
+
+$RULES
 EOF
 chmod ugo+rx debian/rules
 
@@ -124,6 +130,8 @@ Description: documentation for the $PACKAGE ruby gem
  generated rdoc.
 EOF
 
+
+
 dpkg-buildpackage -rfakeroot
 
 cd $origpath
@@ -131,5 +139,4 @@ mkdir -p $PACKAGE
 cp $WORKDIR/$PACKAGE* $PACKAGE/
 ls -l $PACKAGE/*
 
-#rm -rf "$WORKDIR"
-
+rm -rf $WORKDIR

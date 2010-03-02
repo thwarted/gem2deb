@@ -23,7 +23,10 @@ dependencies.
 Environment
 -----
 
-* DEPENDENCIES - Any extra runtime dependencies you would like to declare for a package.
+* DEPENDENCIES - Any extra runtime dependencies you would like to declare for a
+  package.
+* RULES - Adds arbitrary rules to the debian rules file.  Use this to hook into
+  the debian build system and execute arbitrary actions during the package build.
 
 Examples
 -----
@@ -35,3 +38,7 @@ Package the thin gem:
 Package do_sqlite3 and set its dependency on sqlite3:
 
     env DEPENDENCIES="sqlite3" gem2deb do_sqlite3 libdo-sqlite3-ruby
+
+Add files outside of the normal gem path for a build:
+
+    env RULES="install/libmygem-ruby1.8\n\tmkdir -p /var/log/mylogdir" gem2deb mygem.gem
