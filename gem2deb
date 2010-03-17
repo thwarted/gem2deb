@@ -1,17 +1,17 @@
 #!/bin/bash
 # vim: ts=4 expandtab
 
-DEBEMAIL="Cliff Moon <cliff@fastip.com>"
-RELEASE=""
-DISTRO=karmic
+DEBEMAIL="Your Name <youremail@example.com>"
+RELEASE="1rel"
+DISTRO=$( lsb_release -c -s )
 
-base=`dirname $0`
-gem2debdir=`cd $base ; pwd`
+base=$( dirname "$0" )
+gem2debdir=$( cd "$base" ; pwd )
 # from 
 # http://blog.loftninjas.org/?p=248
 
 if [ $# -le 0 ]; then
-    echo "Usage: $0 <URL to .gem or .tar.gz>  [ <package name> ]" >&2
+    echo "Usage: $0 <file .gem or .tar.gz>  [ <package name> ]" >&2
     echo "Generate a .deb package from a ruby .gem (or gem as .tar.gz)" >&2
     exit 1
 fi
@@ -19,6 +19,7 @@ fi
 filename="$1"
 
 set -x
+set -e
 
 origpath=$( pwd )
 #trap "cd '$origpath' && test -d '$WORKDIR' && rm -rf '$WORKDIR'" EXIT
@@ -34,23 +35,23 @@ if [ $? -ne 0 -o ! -d "$WORKDIR" ]; then
     exit 1
 fi
 
-suffix=`echo "$1" | tail -c4`
+suffix=$( echo "$1" | tail -c4 )
 if [ "$suffix" = "gem" ]; then
-  cp $filename $WORKDIR
-  cd $WORKDIR
-  filename=$(basename "$filename")
-  gem unpack "$filename"
-  basedir=$(basename "$filename" .gem)
+    cp $filename $WORKDIR
+    cd $WORKDIR
+    filename=$(basename "$filename")
+    gem unpack "$filename"
+    basedir=$(basename "$filename" .gem)
 else
-  cd $WORKDIR
-  filename=`gem fetch "$1" | awk '{print $2}'`
-  filename="$filename.gem"
-  gem unpack "$filename"
-  basedir=$(basename "$filename" .gem)
+    cd $WORKDIR
+    filename=$( gem fetch "$1" | awk '{print $2}' )
+    filename="$filename.gem"
+    gem unpack "$filename"
+    basedir=$(basename "$filename" .gem)
 fi
 
 
-GEM_DEPENDENCIES=`$gem2debdir/gemdeps.rb $filename`
+GEM_DEPENDENCIES=$( $gem2debdir/gemdeps.rb $filename )
 
 cd "$basedir"
 cp /usr/lib/ruby/1.8/setup.rb .
@@ -62,9 +63,9 @@ gemname=$PACKAGE
 
 
 if [ -d ext ]; then
-  ARCHITECTURE=any
+    ARCHITECTURE=any
 else
-  ARCHITECTURE=all
+    ARCHITECTURE=all
 fi
 
 # we don't want to edit the changelog file after generation
@@ -74,16 +75,16 @@ VISUAL=/bin/true
 export EDITOR VISUAL
 
 if [ -z "$2" ]; then
-    pk=`echo $gemname | tr '_' '-'`
+    pk=$( echo $gemname | tr '_' '-' )
     PACKAGE="lib$pk-ruby"
 else
     PACKAGE="$2"
 fi
 
 if [ -z $DEPENDENCIES ]; then
-  DEPLIST="$GEM_DEPENDENCIES"
+    DEPLIST="$GEM_DEPENDENCIES"
 else
-  DEPLIST="$GEM_DEPENDENCIES, $DEPENDENCIES"
+    DEPLIST="$GEM_DEPENDENCIES, $DEPENDENCIES"
 fi
 
 dch --create "-v$VERSION" -D $DISTRO --package "$PACKAGE" 'initial release'
@@ -141,3 +142,4 @@ cp $WORKDIR/$PACKAGE* $PACKAGE/
 ls -l $PACKAGE/*
 
 rm -rf $WORKDIR
+
