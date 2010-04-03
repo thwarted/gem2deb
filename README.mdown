@@ -20,6 +20,11 @@ that underscores are not allowed in debian package names, therefore gem2deb
 translates underscores into dashes when it creates gem packages and
 dependencies.
 
+Dependencies
+-----
+
+Requires the following debian packages: cdbs ruby-pkg-tools devscripts
+
 Environment
 -----
 
